@@ -1,30 +1,27 @@
 import Phaser from 'phaser';
-import store from '../../../../../app/redux';
-import { socket } from '../../../../../service/socket';
-import TextBox from '../../objects/TextBox';
+import getStore from '../../utils/store';
+import { socket } from '../../../../../common/service/socket';
+import Box from '../../objects/DialogueBox';
 
-type UserScore = {
-  score: number;
-  username: string;
-};
 class EndGame extends Phaser.Scene {
   gameRoom!: string;
 
-  gameOverText!: Phaser.GameObjects.Text;
+  gameOverText!: Box;
 
-  returnToLobbyText!: Phaser.GameObjects.Text;
-
-  textGroup!: Phaser.Physics.Arcade.Group;
+  returnToLobbyText!: Box;
 
   error!: string;
+
+  winnerText!: Box;
 
   constructor() {
     super('EndGame');
   }
 
   preload() {
-    const state = store.getState();
-    const { id } = state.game;
+    const {
+      game: { id },
+    } = getStore();
     this.gameRoom = id;
     this.load.image(
       'background',
@@ -32,70 +29,53 @@ class EndGame extends Phaser.Scene {
     );
   }
 
-  create() {
+  create(gameData: any) {
     this.scene.remove('FortNerf');
     const { width } = this.sys.game.canvas;
     this.add.image(1000, 1000, 'background');
-    this.textGroup = this.physics.add.group();
-    this.gameOverText = new TextBox(
+    this.gameOverText = new Box(
       this,
-      width / 2 - 200,
-      100,
+      width / 2,
+      40,
+      'div',
+      `color: white; font-size: 40px; width: 100%; text-align: center; padding-bottom: 10px; border-bottom: solid 2px white;`,
       'Game Over',
     );
-    this.gameOverText.setFontSize(30);
     // method that starts new scene
     const endGame = async () => {
       try {
-        socket.emit('GameOver', this.gameRoom);
-        socket.emit('return_to_lobby', { room: this.gameRoom });
+        await socket.emit('GameOver', this.gameRoom);
+        await socket.emit('return_to_lobby', { room: this.gameRoom });
       } catch (err) {
+        console.log(err.message);
         this.error = err.message;
       }
     };
-    this.returnToLobbyText = new TextBox(
+    this.winnerText = new Box(
       this,
-      width / 2 + 200,
-      100,
+      width / 2,
+      150,
+      'div',
+      'color: gold; font-size: 50px; background: whitesmoke; padding: 10px; border: groove 5px gold; border-radius: 10px; text-shadow: 0 0 3px #FF0000, 0 0 5px #0000FF',
+      `Winner: ${gameData.winner || 'winner'} !!`,
+    );
+    this.returnToLobbyText = new Box(
+      this,
+      width / 2,
+      400,
+      'button',
+      'color: white; background: none; border: solid 2px white; font-size: 50px; border-radius: 10px;',
       'Return To Lobby',
     )
       .setInteractive()
       .on('pointerdown', endGame);
-    this.returnToLobbyText.setFontSize(30);
-    // socket methods
-    socket.emit('end_game_scores', this.gameRoom);
-
-    socket.on('all_scores', async (data) => {
-      try {
-        let count = 0;
-        data
-          ?.sort((a: UserScore, b: UserScore) => b.score - a.score)
-          .forEach((user: UserScore) => {
-            const score = new TextBox(
-              this,
-              width / 2,
-              150 + 50 * count,
-              `Player: ${user.username} score: ${user.score}`,
-            );
-            score.setFontSize(20);
-            this.textGroup.add(score);
-            count += 1;
-          });
-      } catch (err) {
-        this.error = err.message;
-      }
-    });
   }
 
   update() {
     const { width } = this.sys.game.canvas;
-    this.gameOverText.setX(width / 2 - 200);
-    this.returnToLobbyText.setX(width / 2 + 200);
-    if (this.textGroup.children.entries) {
-      this.textGroup.children.entries.forEach((text: any) => {
-        text.setX(width / 2);
-      });
-    }
+    this.gameOverText.setX(width / 2);
+    this.returnToLobbyText.setX(width / 2);
+    this.winnerText.setX(width / 2);
   }
 }
 
