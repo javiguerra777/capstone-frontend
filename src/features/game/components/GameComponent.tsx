@@ -1,21 +1,18 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Phaser from 'phaser';
-import { useDispatch } from 'react-redux';
-import { enableKeyBoard } from '../../../app/redux/GameSlice';
 import config from '../phaser-game/multiplayer/config/MultiPlayerConfig';
 
 type styleProps = {
   width: string;
 };
-
 function GameComponent({ width }: styleProps) {
-  const dispatch = useDispatch();
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const clickEvent = () => {
-    if (canvasRef.current) {
-      canvasRef.current.focus();
+  const gameRef = useRef<HTMLDivElement>(null);
+  const [focus, setFocus] = useState(false);
+  const makeActive = () => {
+    if (gameRef.current && !focus) {
+      gameRef.current.focus();
+      setFocus(true);
     }
-    dispatch(enableKeyBoard());
   };
   useEffect(() => {
     const phaserGame = new Phaser.Game(config);
@@ -27,13 +24,14 @@ function GameComponent({ width }: styleProps) {
   return (
     <div
       id="main-game"
-      style={{ height: '94vh', width }}
       role="button"
-      onClick={clickEvent}
+      onClick={makeActive}
       tabIndex={0}
       onKeyDown={() => null}
+      onBlur={() => setFocus(false)}
+      style={{ height: '94vh', width }}
       aria-label="canvas element"
-      ref={canvasRef}
+      ref={gameRef}
     />
   );
 }

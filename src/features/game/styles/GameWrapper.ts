@@ -110,7 +110,7 @@ const GameWrapper = styled.main`
       height: 7%;
       input {
         width: 93%;
-        height: 2em;
+        height: 80%;
         border-radius: 1em;
         background: none;
         border: solid 1px gray;
@@ -144,47 +144,6 @@ const GameWrapper = styled.main`
     height: 6%;
     width: 100%;
     border-top: 3px solid #333333);
-  }
-  .flex-row {
-    display: flex;
-    flex-direction: row;
-  }
-  .video-voice {
-    align-items: center;
-    p, button {
-      background: #414a4c;
-      margin-left: 0.5em;
-    }
-    p {
-      color: white;
-      padding: 0.4em;
-      border-radius: 0.5em;
-    }
-    button {
-      font-size: 1.5em;
-      color: green;
-      border: none;
-      padding-top: 0.2em;
-      border-radius: 1em;
-    }
-  }
-  .text-users {
-    button {
-      margin-right: 0.5em;
-      border: none;
-      background: #414a4c;
-      font-size: 1.5em;
-      color: white;
-      border-radius: 0.5em;
-    }
-  }
-  #videoElement {
-    margin-left: 1em;
-    height: 100%;
-    width: 50px;
-    transform: rotateY(180deg);
-    -webkit-transform:rotateY(180deg); /* Safari and Chrome */
-    -moz-transform:rotateY(180deg); /* Firefox */
   }
 `;
 
